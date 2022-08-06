@@ -22,8 +22,8 @@ influx_password = ''
 mask_image = '/home/pi/water_meter/mask_small.png'
 
 # Paths to write water meter images
-water_image = '/mnt/ramdisk/water.jpg'
 water_image_raw = '/mnt/ramdisk/water_raw.jpg'
+water_image_raw_previous = '/mnt/ramdisk/water_raw_previous.jpg'
 water_image_raw_write = '/mnt/ramdisk/water_raw_write.jpg'
 
 # Archive to store images for debugging purposes
@@ -97,6 +97,7 @@ def capture_images():
             stream.seek(0)
             with open(water_image_raw_write, "wb") as f:
                 f.write(stream.getvalue())
+            shutil.copy(water_image_raw, water_image_raw_previous)
             shutil.move(water_image_raw_write, water_image_raw)
             amount_dl = meter_reader.read_meter(water_image_raw)
 
@@ -107,15 +108,22 @@ def capture_images():
             if previous_amount_dl > 9000 and amount_dl < 1000:
                 amount_cubic_meters = amount_cubic_meters + 10000
 
-            previous_amount_dl = amount_dl
-
             stored_result = amount_cubic_meters + amount_dl
             time2 = time.time()
             measure_time = time2 - time1
+            print("Measuring took {}s, previous measurement: {}, new measurement: {}".format(measure_time, previous_amount_dl, amount_dl))
             print("Current water consumption is {}dl".format(stored_result))
+
+            # Archive suspect values for debugging. If consumption between
+            # measurements is negative or if consumption between measurements
+            # is over 100dl, archive previous and current image
+            if amount_dl - previous_amount_dl < 0 or amount_dl - previous_amount_dl > 100:
+                archive_value(previous_amount_dl, water_image_raw_previous)
+                archive_value(amount_dl, water_image_raw)
 
             MySeriesHelper(amount_dl=stored_result)
 
+            previous_amount_dl = amount_dl
             time.sleep(10 - measure_time)
             time1 = time.time()
 
