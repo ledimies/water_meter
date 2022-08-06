@@ -6,12 +6,8 @@ mask_dict = {}
 
 # The mask values below were found with trial&error using helper script
 # mask_tool.py
-# Lighter reds
-lower_red_mask_1 = np.array([1,140,0])
-upper_red_mask_1 = np.array([6,180,255])
-# Darker reds
-lower_red_mask_2 = np.array([6,125,50])
-upper_red_mask_2 = np.array([11,140,200])
+lower_red = np.array([1,140,0])
+upper_red = np.array([10,180,255])
 
 
 def rotate_image(image, angle):
@@ -87,13 +83,9 @@ def determine_value(values):
 def convert_meter_image_to_mask(image):
   hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-  # Brighter reds
-  mask1 = cv2.inRange(hsv, lower_red_mask_1, upper_red_mask_1)
+  mask = cv2.inRange(hsv, lower_red, upper_red)
 
-  # Darker reds
-  mask2 = cv2.inRange(hsv, lower_red_mask_2, upper_red_mask_2)
-
-  return mask1+mask2
+  return mask
 
 
 def read_needles(needles):

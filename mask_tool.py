@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import cv2
+import argparse
 
 # This script can be used to find the right HSV color bounds to
 # make a suitable mask of the water meter dials. See link
@@ -12,7 +13,10 @@ import cv2
 # red in the image other than the dials.
 
 # Read file
-water_image_raw = './water_raw.jpg'
+parser = argparse.ArgumentParser(description='Reads a water meter image and generates mask image')
+parser.add_argument('image_path', help='Path to image')
+args = parser.parse_args()
+water_image_raw = args.image_path
 
 # Written files
 water_image_black_and_white = './water_bw.jpg'
@@ -24,14 +28,10 @@ img = cv2.imread(water_image_raw, cv2.IMREAD_COLOR)
 # Convert to HSV color space
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-# Create a mask using two limits for red colors
+# Create a mask
 lower_red = np.array([1,140,0])
-upper_red = np.array([6,180,255])
-mask1 = cv2.inRange(hsv, lower_red, upper_red)
-lower_red = np.array([6,125,50])
-upper_red = np.array([11,140,200])
-mask2 = cv2.inRange(hsv, lower_red, upper_red)
-mask = mask1+mask2
+upper_red = np.array([10,180,255])
+mask = cv2.inRange(hsv, lower_red, upper_red)
 
 dials = img.copy()
 dials = cv2.bitwise_and(dials, dials, mask=mask)

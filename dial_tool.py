@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 import cv2
 import meter_reader
+import argparse
 
-# The raw source image of the water meter
-water_image_raw = './water_raw.jpg'
 mask_image = './mask_small.png'
+
+parser = argparse.ArgumentParser(description='Reads a water meter image and shows debugging information')
+parser.add_argument('image_path', help='Path to image')
+args = parser.parse_args()
+water_image_raw = args.image_path
 
 def animate(needle):
   for x in range(0, 359):
