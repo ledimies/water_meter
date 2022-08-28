@@ -8,6 +8,7 @@ from influxdb import SeriesHelper
 import shutil
 import meter_reader
 import datetime
+from pathlib import Path
 
 # InfluxDB connection settings
 influx_host = '192.168.1.2'
@@ -86,6 +87,7 @@ def capture_images():
     last_amount = get_last_amount()
     amount_cubic_meters = int(last_amount / 10000) * 10000
     previous_amount_dl = last_amount - amount_cubic_meters
+    Path(water_image_raw).touch()
     print("Last cubic meter cubic meters: {}, deciliters {}".format(amount_cubic_meters, previous_amount_dl))
 
     with picamera.PiCamera() as camera:
